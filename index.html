@@ -1,0 +1,836 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JOKERS OF HELL</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* { box-sizing:border-box; }
+
+body {
+  margin:0;
+  background:#08040b;
+  color:white;
+  font-family:'Press Start 2P',monospace;
+  text-align:center;
+  overflow-x:hidden;
+}
+
+#background {
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:-2;
+  image-rendering:pixelated;
+  filter:blur(2.6px) saturate(1.45);
+  transform:scale(1.035);
+  will-change:transform,filter;
+}
+
+.shade {
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:radial-gradient(ellipse,transparent,#08030bdc);
+}
+
+.screen {
+  min-height:100vh;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  padding:25px 12px;
+}
+
+.screen.active { display:flex; }
+
+.panel {
+  width:100%;
+  max-width:950px;
+  padding:25px;
+  background:#140b19ee;
+  border:5px solid #a52736;
+  box-shadow:8px 8px #050208,0 0 35px #c0213644;
+}
+
+h1 {
+  font-size:clamp(25px,5vw,45px);
+  line-height:1.6;
+  color:#ffcc55;
+  text-shadow:4px 4px #9b1728,0 0 20px red;
+}
+
+h2 { color:#ffcc55;font-size:15px; }
+p { font-size:10px;line-height:2.3; }
+.subtitle { color:#d8a0a0; }
+
+button {
+  background:#a92335;
+  border:3px solid #ff8585;
+  color:white;
+  font-family:inherit;
+  font-size:10px;
+  padding:16px 20px;
+  margin:9px;
+  box-shadow:5px 5px #400d19;
+  cursor:pointer;
+}
+
+button:hover {
+  background:#ed394b;
+  transform:translateY(-3px);
+}
+
+button:disabled { opacity:.35;cursor:not-allowed; }
+
+.stats {
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:20px 0;
+}
+
+.stat {
+  background:#251629;
+  border:3px solid #8c3542;
+  padding:15px;
+  min-width:120px;
+}
+
+.stat h3 { font-size:8px;color:#d8a0a0; }
+.stat span { color:#ffcc55;font-size:16px; }
+
+#cards {
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:12px;
+  margin:35px auto;
+  min-height:130px;
+}
+
+.card {
+  width:75px;
+  height:115px;
+  background:#eee8d9;
+  color:#17121b;
+  border:4px solid white;
+  box-shadow:5px 5px #000;
+  font-size:17px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:10px 5px;
+  cursor:pointer;
+  transition:.15s;
+}
+
+.card:hover { transform:translateY(-8px); }
+
+.card.selected {
+  transform:translateY(-18px);
+  border-color:#ffcc55;
+  box-shadow:0 0 15px #ffcc55;
+}
+
+.red { color:#d92e3b; }
+
+#message {
+  color:#ffcc55;
+  font-size:10px;
+  line-height:2;
+  min-height:25px;
+}
+
+.footer {
+  color:#88747c;
+  font-size:8px;
+  margin-top:25px;
+}
+
+.help {
+  text-align:left;
+  font-size:10px;
+  line-height:2.5;
+}
+
+/* HEAVY HELLISH MOTION BLUR */
+
+#background {
+  animation:backgroundRush 7s ease-in-out infinite alternate;
+}
+
+@keyframes backgroundRush {
+  0% {
+    transform:scale(1.035) translate3d(-5px,2px,0);
+    filter:blur(2.2px) saturate(1.35);
+  }
+  50% {
+    transform:scale(1.075) translate3d(5px,-3px,0);
+    filter:blur(3.8px) saturate(1.7);
+  }
+  100% {
+    transform:scale(1.045) translate3d(-3px,-2px,0);
+    filter:blur(2.8px) saturate(1.5);
+  }
+}
+
+.panel {
+  animation:panelAppear .75s cubic-bezier(.16,1,.3,1) both;
+}
+
+@keyframes panelAppear {
+  0% {
+    opacity:0;
+    transform:translateY(18px) scale(.97);
+    filter:blur(12px);
+  }
+  65% {
+    opacity:1;
+    filter:blur(2px);
+  }
+  100% {
+    opacity:1;
+    transform:translateY(0) scale(1);
+    filter:blur(0);
+  }
+}
+
+.card {
+  animation:cardDeal .42s cubic-bezier(.16,1,.3,1) both;
+  will-change:transform,filter;
+}
+
+.card:nth-child(odd) { animation-delay:.035s; }
+.card:nth-child(even) { animation-delay:.075s; }
+
+@keyframes cardDeal {
+  0% {
+    opacity:0;
+    transform:translateY(-24px) translateX(14px) rotate(7deg);
+    filter:blur(13px);
+  }
+  55% {
+    opacity:1;
+    filter:blur(4px);
+  }
+  100% {
+    opacity:1;
+    transform:translateY(0) rotate(0);
+    filter:blur(0);
+  }
+}
+
+.card:hover {
+  filter:blur(1.2px);
+  transition:transform .16s,filter .16s;
+}
+
+.card.selected {
+  filter:drop-shadow(0 0 7px #ffcc55);
+}
+
+button:active {
+  transform:translateY(2px) scale(.97);
+  filter:blur(1px);
+}
+
+.sound-toggle {
+  position:fixed;
+  z-index:10;
+  top:12px;
+  right:12px;
+  margin:0;
+  padding:10px 12px;
+  font-size:8px;
+  box-shadow:3px 3px #400d19;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #background,.panel,.card {
+    animation:none !important;
+  }
+  .card { filter:none !important; }
+}
+
+@media(max-width:600px) {
+  .panel { padding:12px; }
+  .card { width:60px;height:95px;font-size:13px; }
+  .stat { min-width:95px;padding:10px; }
+  .stat span { font-size:12px; }
+}
+</style>
+</head>
+
+<body>
+
+<button id="soundToggle" class="sound-toggle" onclick="toggleSound()">♫ SOUND: ON</button>
+<canvas id="background"></canvas>
+<div class="shade"></div>
+
+<!-- MAIN MENU -->
+<section id="menu" class="screen active">
+<div class="panel">
+  <p style="font-size:35px;color:#d72d43">♠ ♦ ♣ ♥</p>
+  <h1>JOKERS<br>OF HELL</h1>
+  <p class="subtitle">THE HOUSE ALWAYS WINS.<br>UNLESS YOU CHEAT FATE.</p>
+  <br>
+  <button onclick="startGame()">▶ PLAY GAME</button>
+  <br>
+  <button onclick="showScreen('howto')">HOW TO PLAY</button>
+  <div class="footer">WELCOME TO HELL // VERSION 1.0</div>
+</div>
+</section>
+
+<!-- HOW TO PLAY -->
+<section id="howto" class="screen">
+<div class="panel">
+  <h1>HOW TO PLAY</h1>
+  <div class="help">
+    <p>♠ Select up to five cards.</p>
+    <p>♦ Make poker hands to score points.</p>
+    <p>♣ Beat the target before running out of hands.</p>
+    <p>♥ Discard unwanted cards up to three times.</p>
+    <p style="color:#ffcc55">Win rounds to earn money!</p>
+  </div>
+  <button onclick="showScreen('menu')">BACK</button>
+</div>
+</section>
+
+<!-- GAME -->
+<section id="game" class="screen">
+<div class="panel">
+  <h1 style="font-size:26px">JOKERS OF HELL</h1>
+
+  <div class="stats">
+    <div class="stat"><h3>SCORE</h3><span id="score">0</span></div>
+    <div class="stat"><h3>TARGET</h3><span id="target">300</span></div>
+    <div class="stat"><h3>MONEY</h3>$<span id="money">4</span></div>
+    <div class="stat"><h3>HANDS</h3><span id="hands">4</span></div>
+    <div class="stat"><h3>DISCARDS</h3><span id="discards">3</span></div>
+  </div>
+
+  <h2>YOUR HAND</h2>
+  <p class="subtitle">SELECT UP TO FIVE CARDS</p>
+
+  <div id="cards"></div>
+
+  <div id="message">CHOOSE YOUR CARDS!</div>
+
+  <button id="playBtn" onclick="playHand()">PLAY HAND</button>
+  <button id="discardBtn" onclick="discard()">DISCARD</button>
+  <br>
+  <button onclick="showScreen('menu')">MAIN MENU</button>
+
+  <div class="footer">EVERY HAND IS A GAMBLE.</div>
+</div>
+</section>
+
+<!-- GAME OVER -->
+<section id="gameover" class="screen">
+<div class="panel">
+  <h1>GAME OVER</h1>
+  <p>THE HOUSE CLAIMS ANOTHER SOUL.</p>
+  <p>YOUR MONEY: $<span id="finalMoney">0</span></p>
+  <button onclick="startGame()">TRY AGAIN</button>
+  <button onclick="showScreen('menu')">MENU</button>
+</div>
+</section>
+
+<!-- VICTORY -->
+<section id="victory" class="screen">
+<div class="panel">
+  <h1>YOU ESCAPED?</h1>
+  <p>THE DEVIL WILL REMEMBER THIS.</p>
+  <button onclick="startGame()">PLAY AGAIN</button>
+  <button onclick="showScreen('menu')">MENU</button>
+</div>
+</section>
+
+<script>
+
+// ======================================
+// PIXELATED 3D SWIRL BACKGROUND
+// ======================================
+
+const canvas=document.getElementById("background");
+const ctx=canvas.getContext("2d");
+const frameCanvas=document.createElement("canvas");
+const frameCtx=frameCanvas.getContext("2d");
+const trailCanvas=document.createElement("canvas");
+const trailCtx=trailCanvas.getContext("2d");
+
+let time=0;
+let width,height;
+
+function resize() {
+  width=Math.ceil(window.innerWidth/4);
+  height=Math.ceil(window.innerHeight/4);
+  canvas.width=width;
+  canvas.height=height;
+  frameCanvas.width=trailCanvas.width=width;
+  frameCanvas.height=trailCanvas.height=height;
+  trailCtx.clearRect(0,0,width,height);
+}
+
+window.addEventListener("resize",resize);
+resize();
+
+function drawSwirl() {
+  time+=0.025;
+
+  const image=ctx.createImageData(width,height);
+  const data=image.data;
+
+  const cx=width/2;
+  const cy=height/2;
+
+  for(let y=0;y<height;y++) {
+    for(let x=0;x<width;x++) {
+      const dx=x-cx;
+      const dy=(y-cy)*1.15;
+
+      const radius=Math.sqrt(dx*dx+dy*dy);
+      const angle=Math.atan2(dy,dx);
+
+      const twist=angle+radius*0.045-time;
+      const wave=Math.sin(twist*5+radius*.22);
+
+      const bands=Math.floor((wave+1)*4);
+      const lighting=Math.max(0,Math.cos(wave*1.5));
+      const glow=Math.max(0,1-radius/(width*.8));
+
+      let r=9,g=3,b=13;
+
+      if(bands>3) {
+        r=100+lighting*100;
+        g=5+lighting*12;
+        b=15+lighting*15;
+      } else if(bands>1) {
+        r=35+lighting*65;
+        g=5;
+        b=14;
+      }
+
+      r+=glow*45;
+      g+=glow*5;
+
+      const center=Math.max(0,1-radius/12);
+      r*=1-center;
+      g*=1-center;
+      b*=1-center;
+
+      const i=(y*width+x)*4;
+      data[i]=Math.min(255,r);
+      data[i+1]=Math.min(255,g);
+      data[i+2]=Math.min(255,b);
+      data[i+3]=255;
+    }
+  }
+
+  frameCtx.putImageData(image,0,0);
+
+  // Motion blur afterimage trails
+  trailCtx.save();
+  trailCtx.globalAlpha=0.34;
+  trailCtx.drawImage(trailCanvas,0,0);
+  trailCtx.globalAlpha=0.78;
+  trailCtx.filter="blur(1.15px)";
+  trailCtx.drawImage(frameCanvas,0,0);
+  trailCtx.restore();
+
+  ctx.clearRect(0,0,width,height);
+  ctx.drawImage(trailCanvas,0,0);
+
+  requestAnimationFrame(drawSwirl);
+}
+
+drawSwirl();
+
+
+// ======================================
+// SOUND EFFECTS
+// ======================================
+
+let soundEnabled=true;
+let audioContext=null;
+
+function getAudioContext() {
+  const AudioCtx=window.AudioContext||window.webkitAudioContext;
+  if(!AudioCtx) return null;
+  if(!audioContext) audioContext=new AudioCtx();
+  if(audioContext.state==="suspended") audioContext.resume();
+  return audioContext;
+}
+
+function tone(freq,duration,type="square",volume=0.045,endFreq=null,delay=0) {
+  if(!soundEnabled) return;
+
+  const ac=getAudioContext();
+  if(!ac) return;
+
+  const osc=ac.createOscillator();
+  const gain=ac.createGain();
+  const start=ac.currentTime+delay;
+
+  osc.type=type;
+  osc.frequency.setValueAtTime(freq,start);
+
+  if(endFreq) {
+    osc.frequency.exponentialRampToValueAtTime(
+      Math.max(1,endFreq),start+duration
+    );
+  }
+
+  gain.gain.setValueAtTime(0.0001,start);
+  gain.gain.exponentialRampToValueAtTime(volume,start+0.012);
+  gain.gain.exponentialRampToValueAtTime(0.0001,start+duration);
+
+  osc.connect(gain);
+  gain.connect(ac.destination);
+
+  osc.start(start);
+  osc.stop(start+duration+0.025);
+}
+
+function noiseBurst(duration=0.12,volume=0.025,delay=0) {
+  if(!soundEnabled) return;
+
+  const ac=getAudioContext();
+  if(!ac) return;
+
+  const length=Math.max(1,Math.floor(ac.sampleRate*duration));
+  const buffer=ac.createBuffer(1,length,ac.sampleRate);
+  const data=buffer.getChannelData(0);
+
+  for(let i=0;i<length;i++) {
+    data[i]=(Math.random()*2-1)*(1-i/length);
+  }
+
+  const source=ac.createBufferSource();
+  const filter=ac.createBiquadFilter();
+  const gain=ac.createGain();
+  const start=ac.currentTime+delay;
+
+  source.buffer=buffer;
+  filter.type="lowpass";
+  filter.frequency.setValueAtTime(1800,start);
+  filter.frequency.exponentialRampToValueAtTime(180,start+duration);
+
+  gain.gain.setValueAtTime(volume,start);
+  gain.gain.exponentialRampToValueAtTime(0.0001,start+duration);
+
+  source.connect(filter);
+  filter.connect(gain);
+  gain.connect(ac.destination);
+
+  source.start(start);
+}
+
+function playSfx(kind) {
+  if(!soundEnabled) return;
+
+  switch(kind) {
+
+    case "click":
+      tone(620,.045,"square",.025,420);
+      break;
+
+    case "select":
+      tone(520,.075,"triangle",.035,780);
+      noiseBurst(.045,.012);
+      break;
+
+    case "deselect":
+      tone(500,.07,"triangle",.03,300);
+      break;
+
+    case "play":
+      noiseBurst(.22,.045);
+      tone(170,.22,"sawtooth",.045,65);
+      tone(90,.18,"square",.025,48,.04);
+      break;
+
+    case "discard":
+      noiseBurst(.3,.035);
+      tone(440,.18,"sawtooth",.025,110);
+      break;
+
+    case "win":
+      tone(392,.18,"square",.04,520);
+      tone(523,.2,"square",.04,700,.16);
+      tone(784,.42,"triangle",.05,1040,.32);
+      break;
+
+    case "lose":
+      tone(220,.35,"sawtooth",.05,90);
+      tone(165,.55,"triangle",.045,55,.28);
+      noiseBurst(.5,.025,.1);
+      break;
+  }
+}
+
+function toggleSound() {
+  soundEnabled=!soundEnabled;
+
+  const button=document.getElementById("soundToggle");
+
+  button.textContent=soundEnabled?"♫ SOUND: ON":"♫ SOUND: OFF";
+  button.style.opacity=soundEnabled?"1":".55";
+
+  if(soundEnabled) playSfx("click");
+}
+
+document.addEventListener("click",event=>{
+  if(event.target.closest("button") && !event.target.closest("#soundToggle")) {
+    playSfx("click");
+  }
+});
+
+
+// ======================================
+// GAME SYSTEM
+// ======================================
+
+const suits=["♠","♥","♦","♣"];
+const ranks=["2","3","4","5","6","7","8","9","10","J","Q","K","A"];
+
+let deck=[],hand=[],selected=[];
+let score=0,target=300,money=4;
+let hands=4,discards=3,round=1,locked=false;
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+
+  const next=document.getElementById(id);
+  next.classList.add("active");
+
+  const panel=next.querySelector(".panel");
+
+  if(panel) {
+    panel.style.animation="none";
+    void panel.offsetWidth;
+    panel.style.animation="";
+  }
+}
+
+function createDeck() {
+  deck=[];
+
+  for(const suit of suits) {
+    for(const rank of ranks) {
+      deck.push({
+        suit,
+        rank,
+        value:ranks.indexOf(rank)+2
+      });
+    }
+  }
+
+  for(let i=deck.length-1;i>0;i--) {
+    const j=Math.floor(Math.random()*(i+1));
+    [deck[i],deck[j]]=[deck[j],deck[i]];
+  }
+}
+
+function drawCard() {
+  if(deck.length===0) createDeck();
+  return deck.pop();
+}
+
+function drawHand() {
+  while(hand.length<8) hand.push(drawCard());
+  render();
+}
+
+function render() {
+  const area=document.getElementById("cards");
+  area.innerHTML="";
+
+  hand.forEach((card,index)=>{
+    const div=document.createElement("div");
+    div.className="card";
+
+    if(selected.includes(index)) div.classList.add("selected");
+    if(card.suit==="♥"||card.suit==="♦") div.classList.add("red");
+
+    div.innerHTML=`<div>${card.rank}</div><div>${card.suit}</div>`;
+    div.onclick=()=>toggleCard(index);
+
+    area.appendChild(div);
+  });
+
+  document.getElementById("score").textContent=score;
+  document.getElementById("target").textContent=target;
+  document.getElementById("money").textContent=money;
+  document.getElementById("hands").textContent=hands;
+  document.getElementById("discards").textContent=discards;
+
+  document.getElementById("playBtn").disabled=locked||hands<=0;
+  document.getElementById("discardBtn").disabled=locked||discards<=0;
+}
+
+function toggleCard(index) {
+  if(locked) return;
+
+  if(selected.includes(index)) {
+    playSfx("deselect");
+    selected=selected.filter(x=>x!==index);
+  } else if(selected.length<5) {
+    playSfx("select");
+    selected.push(index);
+  }
+
+  render();
+}
+
+function getHandType(cards) {
+  const values=cards.map(c=>c.value).sort((a,b)=>a-b);
+  const counts={};
+
+  cards.forEach(c=>counts[c.rank]=(counts[c.rank]||0)+1);
+
+  const groups=Object.values(counts).sort((a,b)=>b-a);
+
+  const flush=cards.length===5&&cards.every(c=>c.suit===cards[0].suit);
+
+  const straight=cards.length===5&&(
+    values.every((v,i)=>i===0||v===values[i-1]+1)||
+    values.join(",")==="2,3,4,5,14"
+  );
+
+  if(flush&&straight)return["STRAIGHT FLUSH",100,8];
+  if(groups[0]===4)return["FOUR OF A KIND",60,7];
+  if(groups[0]===3&&groups[1]===2)return["FULL HOUSE",40,4];
+  if(flush)return["FLUSH",35,4];
+  if(straight)return["STRAIGHT",30,4];
+  if(groups[0]===3)return["THREE OF A KIND",30,3];
+  if(groups[0]===2&&groups[1]===2)return["TWO PAIR",20,2];
+  if(groups[0]===2)return["PAIR",10,2];
+
+  return["HIGH CARD",5,1];
+}
+
+function playHand() {
+  if(locked||hands<=0)return;
+
+  if(selected.length===0) {
+    document.getElementById("message").textContent="SELECT CARDS FIRST!";
+    return;
+  }
+
+  playSfx("play");
+
+  const cards=selected.map(i=>hand[i]);
+  const [name,chips,multiplier]=getHandType(cards);
+
+  const points=cards.reduce((sum,c)=>sum+c.value,0);
+  const total=(chips+points)*multiplier;
+
+  score+=total;
+  hands--;
+
+  document.getElementById("message").textContent=name+"! +"+total+" POINTS";
+
+  selected.sort((a,b)=>b-a).forEach(i=>hand.splice(i,1));
+  selected=[];
+
+  drawHand();
+  checkRound();
+}
+
+function discard() {
+  if(locked||selected.length===0||discards<=0)return;
+
+  playSfx("discard");
+
+  selected.sort((a,b)=>b-a).forEach(i=>hand.splice(i,1));
+  selected=[];
+  discards--;
+
+  drawHand();
+
+  document.getElementById("message").textContent="CARDS DISCARDED!";
+  render();
+}
+
+function checkRound() {
+  if(score>=target) {
+    playSfx("win");
+    locked=true;
+    render();
+
+    document.getElementById("message").textContent="BLIND DEFEATED! +$5";
+
+    setTimeout(()=>{
+      money+=5;
+      round++;
+
+      if(round>8) {
+        document.getElementById("finalMoney").textContent=money;
+        showScreen("victory");
+        return;
+      }
+
+      target=Math.floor(target*1.7);
+      score=0;
+      hands=4;
+      discards=3;
+      locked=false;
+      hand=[];
+      selected=[];
+
+      createDeck();
+      drawHand();
+
+      document.getElementById("message").textContent="ROUND "+round+" - GOOD LUCK!";
+      render();
+
+    },1200);
+
+  } else if(hands===0) {
+    playSfx("lose");
+    locked=true;
+    render();
+
+    setTimeout(()=>{
+      document.getElementById("finalMoney").textContent=money;
+      showScreen("gameover");
+    },1000);
+  }
+
+  render();
+}
+
+function startGame() {
+  score=0;
+  target=300;
+  money=4;
+  hands=4;
+  discards=3;
+  round=1;
+  locked=false;
+  hand=[];
+  selected=[];
+
+  createDeck();
+  drawHand();
+
+  document.getElementById("message").textContent="WELCOME TO HELL.";
+
+  showScreen("game");
+  render();
+}
+
+</script>
+
+</body>
+</html>
